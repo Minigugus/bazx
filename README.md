@@ -34,7 +34,7 @@ Unlike zx, bazx doesn't gather outputs into possibly big strings by default. The
 ### Deno
 
 ```js
-import { $ } from 'https://github.com/Minigugus/bazx/master/mod.ts';
+import { $ } from 'https://deno.land/x/bazx/mod.ts';
 ```
 
 As of now, only the `--allow-run` command is required at runtime.
@@ -42,7 +42,7 @@ As of now, only the `--allow-run` command is required at runtime.
 ### (Bring Your Own Runtime)
 
 ```ts
-import { create } from 'https://github.com/Minigugus/bazx/master/index.ts'; // `index.ts` is isomorphic, `mod.ts` is Deno only
+import { create } from 'https://deno.land/x/bazx/index.ts'; // `index.ts` is isomorphic, `mod.ts` is Deno only
 
 const $ = create({
   exec(
