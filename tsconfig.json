@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "module": "esnext",
+    "target": "esnext",
+    "strict": true,
+    "noUncheckedIndexedAccess": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/*.ts",
+    "./deno.d.ts",
+    "./mod.ts",
+    "./deno.ts"
+  ]
+}
