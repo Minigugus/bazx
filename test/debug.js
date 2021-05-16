@@ -7,7 +7,7 @@ console.log(
     $`cat ${'this will cause an error'}`
       .pipe($`env`)
       .pipe(new TransformStream({
-        transform(chunk, controller) {
+        transform(chunk) {
           console.warn('DROPPED', chunk.byteLength, 'BYTES');
         },
         flush(controller) {

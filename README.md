@@ -1,6 +1,10 @@
-# bazx (🐚️ + 💊️)
+<center>
+<h1>BAZX</h1>
 
 > 🐚️ [zx](https://github.com/google/zx) on 💊️ steroids
+</center>
+
+[![asciicast](https://asciinema.org/a/ydfYbBXFyDDyDOeSPormkjEo6.svg)](https://asciinema.org/a/ydfYbBXFyDDyDOeSPormkjEo6)
 
 ## Main differences with ZX
 
@@ -56,7 +60,7 @@ const $ = create({
 
 ## Usage
 
-See TypeScript types and documentation for more a accurate documentation.
+See the [`test`](test/) folder
 
 ### The `$` tagged template function
 
@@ -91,15 +95,29 @@ console.log(await stdout($`echo Hello world!`));
 
 This project is work in progress for now; bugs and API change are expected.
 
-Please fill an issue for any bug you encounter :wink:.
+Please fill an issue for any bug you encounter and open a discussion for any question or enhancement. :wink:
 
 ### TODO
 
- * Rollup for NodeJS and browser builds
- * Improve docs
- * Add more runtime support (NodeJS at least)
- * Fix bugs (some complex use case doesn't work yet)
+ * [ ] Rollup for NodeJS and browser builds
+ * [ ] Improve docs
+ * [ ] Add more runtime support (NodeJS at least)
+ * [ ] Fix bugs (some complex use case doesn't work yet)
+
+## FAQ
+
+### Why is it called `bazx`?
+
+Just like `bash` built from `sh`, there should be a `bazx` built from `zx` 😁️
+
+### How do you prononce `bazx`?
+
+Just like *basic* but with a *x* instead of a *c* at the end: *basix*
 
 ## License
 
-[MIT](LICENSE)
+Inspired by [zx](https://github.com/google/zx)
+
+[MIT License](LICENSE)
+
+Copyright 2021 Minigugus
