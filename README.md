@@ -1,5 +1,5 @@
 <center>
-<h1>BAZX</h1>
+  <h1><a href="https://deno.land/x/bazx">BAZX</a></h1>
 
 > 🐚️ [zx](https://github.com/google/zx) on 💊️ steroids
 </center>
