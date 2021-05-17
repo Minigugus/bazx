@@ -2,6 +2,16 @@ import { $, stdout, collect } from '../mod.ts';
 
 await $`echo two arguments, ${'one argument'}`;
 
+// FROM https://github.com/google/zx/issues/35#issue-880926668
+const dir = import.meta.url.slice(import.meta.url.indexOf('://') + 3, import.meta.url.lastIndexOf('/'));
+console.log(
+  await collect(
+    $`find ${dir} -type f -print0`
+      .pipe($`xargs -0 grep foo`)
+      .pipe($`wc -l`)
+  )
+);
+
 console.log(
   await collect(
     $`cat ${'this will cause an error'}`
