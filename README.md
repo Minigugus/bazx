@@ -95,6 +95,12 @@ console.log(await stdout($`echo Hello world!`));
 // => { success: true, code: 0, stdout: "Hello world!" }
 ```
 
+### Environment variables
+
+Environment variables are inherited from the runtime. For instance, with *Deno*, you must use `Deno.env` with the appropriate permission to change environment variables passed to the child process (`Deno.run` inherits `Deno.env` by default).
+
+Environment variables are still under discussion. Suggestions welcomed :slightly_smiling_face:.
+
 ## WIP
 
 This project is a work in progress for now; bugs and API change are expected.
