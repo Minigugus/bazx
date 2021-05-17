@@ -28,6 +28,7 @@ Unlike zx, bazx doesn't gather outputs into possibly big strings by default. The
  * NodeJS: 🥚️ (not started yet)
  * QuickJS: 🥚️ (not started yet)
  * Browser: 🥚️ (not started yet)
+ * Mock: 🥚️ (not started yet)
 
 ## Setup
 
@@ -42,7 +43,8 @@ As of now, only the `--allow-run` command is required at runtime.
 ### (Bring Your Own Runtime)
 
 ```ts
-import { create } from 'https://deno.land/x/bazx/index.ts'; // `index.ts` is isomorphic, `mod.ts` is Deno only
+// `index.ts` is isomorphic, `mod.ts` is Deno only
+import { create } from 'https://deno.land/x/bazx/index.ts';
 
 const $ = create({
   exec(
@@ -53,14 +55,14 @@ const $ = create({
       stderr: WritableStream<Uint8Array>
     }
   ): PromiseLike<{ success: boolean, code: number }> {
-    // Insert runtime-dependant code here
+    // Create thread here
   }
 }, { /* Default options */ });
 ```
 
 ## Usage
 
-See the [`test`](test/) folder
+See the [`test`](test/) folder for more complete examples
 
 ### The `$` tagged template function
 
@@ -86,6 +88,8 @@ See [`test/debug.js`](test/debug.js) for a pratical overview.
 Utilities to read respectively `stdout`, `stderr` and both from the command passed as argument:
 
 ```js
+import { stdout } from 'https://deno.land/x/bazx/index.ts';
+
 console.log(await stdout($`echo Hello world!`));
 
 // => { success: true, code: 0, stdout: "Hello world!" }
@@ -93,16 +97,22 @@ console.log(await stdout($`echo Hello world!`));
 
 ## WIP
 
-This project is work in progress for now; bugs and API change are expected.
+This project is a work in progress for now; bugs and API change are expected.
 
-Please fill an issue for any bug you encounter and open a discussion for any question or enhancement. :wink:
+Please fill an issue for any bug you encounter and open a discussion for any question or suggestion. :wink:
 
 ### TODO
 
- * [ ] Rollup for NodeJS and browser builds
  * [ ] Improve docs
+ * [ ] Rollup for NodeJS and browser builds
  * [ ] Add more runtime support (NodeJS at least)
  * [ ] Fix bugs (some complex use case doesn't work yet)
+ * [ ] Dynamic config update (like `set` in bash (enable/disable logs, etc.))
+ * [ ] `NO_COLOR` support (for CI/CD)
+ * [ ] Pipelines starting with a stream
+ * [ ] `stderr` pipes
+ * [ ] Add benchmarks, improve perfs (audit WHATWG streams perfs)
+ * [ ] Discuss envrionment variables support
 
 ## FAQ
 
@@ -112,7 +122,7 @@ Just like `bash` built from `sh`, there should be a `bazx` built from `zx` 😁�
 
 ### How do you prononce `bazx`?
 
-Just like *basic* but with a *x* instead of a *c* at the end: *basix*
+*basix* (just like *basic* but with a *x* instead of a *c* at the end)
 
 ## License
 
