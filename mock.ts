@@ -7,7 +7,7 @@ export * from './mod.ts'
 
 import type { BazxExec, BazxOptions } from './mod.ts';
 
-import { createBaxz } from './mod.ts';
+import { createBazx } from './mod.ts';
 
 export const exec: BazxExec = async function exec(cmd, { stdin, stdout, stderr } = {}) {
   await Promise.all([
@@ -20,6 +20,6 @@ export const exec: BazxExec = async function exec(cmd, { stdin, stdout, stderr }
 
 export const options: BazxOptions = {};
 
-export const $ = createBaxz(exec, options);
+export const $ = createBazx(exec, options);
 
 export default $;

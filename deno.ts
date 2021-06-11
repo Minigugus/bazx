@@ -6,7 +6,7 @@ export * from './mod.ts'
 
 import type { BazxExec, BazxOptions } from './mod.ts';
 
-import { createBaxz } from './mod.ts';
+import { createBazx } from './mod.ts';
 
 function streamCopyToStream(reader: Deno.Reader & Deno.Closer) {
   const buffer = new Uint8Array(16_640);
@@ -96,7 +96,7 @@ export const options: BazxOptions = {
   log: chunk => Deno.stdout.writeSync(chunk)
 };
 
-export const $ = createBaxz(exec, options);
+export const $ = createBazx(exec, options);
 
 export default $;
 

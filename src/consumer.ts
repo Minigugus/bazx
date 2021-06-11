@@ -358,7 +358,7 @@ export interface $ {
   with(middleware: (exec: BazxExec) => BazxExec): $;
 }
 
-export function createBaxz(exec: BazxExec, options: BazxOptions = {}): $ {
+export function createBazx(exec: BazxExec, options: BazxOptions = {}): $ {
   function $(xs: TemplateStringsArray, ...args: any[]) {
     if (args.length === 0 && xs[0]?.length === 0)
       return new Command(options, () => '', async ({ stdin, stdout, stderr } = {}) => {
@@ -380,7 +380,7 @@ export function createBaxz(exec: BazxExec, options: BazxOptions = {}): $ {
   }
 
   function withMiddleware(middleware: (exec: BazxExec) => BazxExec): $ {
-    return createBaxz(middleware(exec), options);
+    return createBazx(middleware(exec), options);
   }
 
   return Object.assign($, {
