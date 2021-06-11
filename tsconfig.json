@@ -6,10 +6,8 @@
     "noUncheckedIndexedAccess": true
   },
   "include": [
-    "src/**/*.ts",
+    "./*.ts",
     "src/*.ts",
-    "./deno.d.ts",
-    "./mod.ts",
-    "./deno.ts"
+    "examples/*.ts",
   ]
 }

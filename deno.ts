@@ -1,62 +1,12 @@
+// Bazx implementation for Deno.
+
 /// <reference path="./deno.d.ts" />
 
-import { create, BazxOptions } from './mod.ts';
+export * from './mod.ts'
 
-export const $ = createDeno();
+import type { BazxExec, BazxOptions } from './mod.ts';
 
-export function createDeno(options?: Partial<BazxOptions>) {
-  return create({
-    async exec(cmd, { stdin, stdout, stderr }) {
-      const proc = Deno.run({
-        cmd,
-        stdin: stdin ? 'piped' : 'null',
-        stdout: stdout ? 'piped' : 'null',
-        stderr: stderr ? 'piped' : 'null'
-      });
-      const procIn = stdin && stdin.pipeTo(streamCopyFromStream(proc.stdin!));
-      const procOut = stdout && streamCopyToStream(proc.stdout!).pipeTo(stdout);
-      const procErr = stderr && streamCopyToStream(proc.stderr!).pipeTo(stderr);
-      const result = await proc.status();
-      await Promise.all([
-        procIn,
-        procOut,
-        procErr
-      ])
-      proc.close();
-      return result;
-    },
-    get stdout() {
-      return streamCopyFromStream({ write: chunk => Deno.stdout.write(chunk) });
-    },
-    get stderr() {
-      const decoder = new TextDecoder();
-      const encoder = new TextEncoder();
-      return new WritableStream<Uint8Array>({
-        async write(chunk) {
-          await Deno.stderr.write(encoder.encode(`\x1B[31m${decoder.decode(chunk)}\x1B[0m`));
-        }
-      }, new ByteLengthQueuingStrategy({
-        highWaterMark: 16_640
-      }));
-    }
-  }, options);
-}
-
-function streamCopyFromStream(writer: Deno.Writer & Partial<Deno.Closer>) {
-  return new WritableStream<Uint8Array>({
-    async write(chunk) {
-      await writer.write(chunk);
-    },
-    close() {
-      writer.close?.();
-    },
-    abort() {
-      writer.close?.();
-    }
-  }, new ByteLengthQueuingStrategy({
-    highWaterMark: 16_640
-  }));
-}
+import { createBaxz } from './mod.ts';
 
 function streamCopyToStream(reader: Deno.Reader & Deno.Closer) {
   const buffer = new Uint8Array(16_640);
@@ -66,7 +16,7 @@ function streamCopyToStream(reader: Deno.Reader & Deno.Closer) {
       try {
         while (controller.desiredSize! > 0) {
           if ((read = await reader.read(buffer.subarray(0, Math.min(buffer.byteLength, controller.desiredSize ?? Number.MAX_VALUE)))) === null) {
-            reader.close?.();
+            reader.close();
             controller.close();
             return;
           }
@@ -80,9 +30,103 @@ function streamCopyToStream(reader: Deno.Reader & Deno.Closer) {
       }
     },
     cancel() {
-      reader.close?.();
+      reader.close();
     }
   }, new ByteLengthQueuingStrategy({
-    highWaterMark: 16_640
+    highWaterMark: 16640
   }));
 }
+
+async function pipeReadableStream2Writer(
+  readable: ReadableStream<Uint8Array>,
+  writer: Deno.Writer & Deno.Closer
+) {
+  const reader = readable.getReader();
+  try {
+    let read: ReadableStreamReadResult<Uint8Array>;
+    while (!(read = await reader.read()).done)
+      if (!await writer.write(read.value!))
+        break;
+    await reader.cancel();
+  } catch (err) {
+    if (err instanceof Deno.errors.BrokenPipe)
+      await reader.releaseLock();
+    else
+      await reader.cancel(err);
+  } finally {
+    try {
+      writer.close();
+    } catch (ignored) { }
+  }
+}
+
+export const exec: BazxExec = async function exec(cmd, {
+  cwd,
+  env,
+  stdin,
+  stdout,
+  stderr,
+  signal
+} = {}) {
+  const process = Deno.run({
+    cmd,
+    cwd,
+    env,
+    stdin: stdin ? 'piped' : 'null',
+    stdout: stdout ? 'piped' : 'null',
+    stderr: stderr ? 'piped' : 'null',
+  });
+  signal?.addEventListener('abort', () => process.kill?.(9), { once: true });
+  try {
+    const [{ code, signal: exitSignal }] = await Promise.all([
+      process.status(),
+      stdin && pipeReadableStream2Writer(stdin, process.stdin!),
+      stdout && streamCopyToStream(process.stdout!).pipeTo(stdout),
+      stderr && streamCopyToStream(process.stderr!).pipeTo(stderr),
+    ]);
+    return { code, signal: exitSignal };
+  } finally {
+    process.close();
+  }
+}
+
+export const options: BazxOptions = {
+  highWaterMark: 16640,
+  noColors: Deno.noColor,
+  log: chunk => Deno.stdout.writeSync(chunk)
+};
+
+export const $ = createBaxz(exec, options);
+
+export default $;
+
+Deno.test({
+  name: 'everything works',
+  async fn() {
+    // @ts-ignore
+    const assert: (expr: unknown, msg: string) => asserts expr = (await import("https://deno.land/std/testing/asserts.ts")).assert;
+    // @ts-ignore
+    const { fail, assertEquals } = await import("https://deno.land/std/testing/asserts.ts");
+
+    const cmd = $`bash -c ${'echo Hello world! $(env | grep WTF) $(pwd)'}`
+      .cwd('/bin')
+      .pipe(new TransformStream({
+        start(controller) {
+          controller.enqueue(new TextEncoder().encode('Someone said: '));
+        }
+      }))
+      .env('WTF', 'it works')
+      .pipe($`sh -c ${'cat - $(realpath $(env | grep WTF))'}`)
+      .env('WTF', 'not_found')
+      .cwd('/');
+
+    try {
+      await cmd.text();
+      fail("Should have thrown since cat should have failed");
+    } catch (err) {
+      assertEquals(`Command ${cmd.command} exited with code 1`, err.message);
+      assert(err.response instanceof Response, "err.response is defined and is an instance of Response");
+      assertEquals('Someone said: Hello world! WTF=it works /bin\n', await err.response.text());
+    }
+  }
+});
